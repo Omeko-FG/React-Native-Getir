@@ -1,40 +1,43 @@
 import React from "react";
-import {
-  Dimensions,
-  ScrollView,
-  View,
-  TouchableOpacity,
-  Image,
-  Text,
-} from "react-native";
+import { View, Text, Image, TouchableOpacity, Dimensions } from "react-native";
 import { Entypo } from "@expo/vector-icons";
-import { Product } from '../../models'
+import { Product } from "../../models";
+import { useNavigation } from "@react-navigation/native";
+import { connect } from "react-redux";
+import * as actions from "../../redux/actions/cartActions";
 
-type productItemType = {
-    item: Product
-}
+type producItemType = {
+  item: Product;
+  addItemToCart: (a: Product) => void;
+};
+
 const { height, width } = Dimensions.get("window");
-
-function index({item}:productItemType) {
+function index({ item, addItemToCart }: producItemType) {
+  const navigation = useNavigation();
   return (
     <TouchableOpacity
+      onPress={() => navigation.navigate("ProductDetails", { product: item })}
       style={{
-        width: width * 0.3,
+        width: width * 0.285,
+        marginTop: 12,
         height: height * 0.25,
+        flexDirection: "column",
+        alignItems: "flex-start",
         marginLeft: 12,
-        marginVertical: 10,
+        // backgroundColor:'red',
+        marginBottom: 10,
       }}
     >
       <Image
         style={{
-          width: width * 0.27,
-          height: height * 0.15,
-          borderRadius: 10,
-          borderWidth: 0.3,
+          width: width * 0.285,
+          height: width * 0.285,
+          borderRadius: 12,
+          borderWidth: 0.1,
           borderColor: "gray",
         }}
         source={{
-          uri: item.image
+          uri: item.image,
         }}
       />
       <View
@@ -42,14 +45,16 @@ function index({item}:productItemType) {
       >
         <Text
           style={{
-            fontSize: 11,
-            color: "#747990",
             textDecorationLine: "line-through",
+            color: "#747990",
+            fontWeight: "bold",
+            fontSize: 10,
           }}
         >
           <Text>$</Text>
-          <Text>{item.fiyat}</Text>
+          {item.fiyat}
         </Text>
+
         <Text
           style={{
             color: "#5D3EBD",
@@ -59,38 +64,42 @@ function index({item}:productItemType) {
           }}
         >
           <Text>$</Text>
-          <Text>{item.fiyatIndirim}</Text>
+          {item.fiyatIndirimli}
         </Text>
       </View>
-      <Text style={{ fontSize: 12, fontWeight: "600", marginTop: 5 }}>
+      <Text style={{ fontWeight: "600", fontSize: 13, marginTop: 4 }}>
         {item.name}
       </Text>
       <Text
         style={{
-          fontSize: 12,
-          fontWeight: "500",
-          marginTop: 4,
           color: "#747990",
+          fontSize: 12,
+          marginTop: 4,
+          fontWeight: "600",
         }}
       >
         {item.miktar}
       </Text>
+
       <TouchableOpacity
+        onPress={() => {
+          addItemToCart(item);
+        }}
         style={{
-            position: "absolute",
-            borderWidth: 0.3,
-            right:0,
-            top: -6,
-            borderRadius: 5,
-            shadowRadius: 3.8,
-            shadowOpacity: 0.05,
-            borderColor: "lightgrey",
-            backgroundColor: "white",
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-            width: 30,
-            height: 30,
+          position: "absolute",
+          borderWidth: 0.3,
+          right: -10,
+          top: -10,
+          borderRadius: 5,
+          shadowRadius: 3.8,
+          shadowOpacity: 0.05,
+          borderColor: "lightgrey",
+          backgroundColor: "white",
+          flexDirection: "row",
+          justifyContent: "center",
+          alignItems: "center",
+          width: 30,
+          height: 30,
         }}
       >
         <Entypo name="plus" size={22} color="#5D3EBD" />
@@ -98,5 +107,10 @@ function index({item}:productItemType) {
     </TouchableOpacity>
   );
 }
-
-export default index;
+const mapDispatchToProps = (dispatch:any) => {
+  return {
+    addItemToCart: (product: Product) =>
+      dispatch(actions.addToCart({ quantity: 1, product })),
+  };
+};
+export default connect(null, mapDispatchToProps)(index);
